@@ -1,0 +1,7 @@
+diffusers[torch]==0.26.3
+transformers
+accelerate
+torch
+safetensors
+runpod
+pillow
