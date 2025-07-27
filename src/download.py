@@ -29,10 +29,10 @@ CONFIG = {
         # Format: (model_id, filename)
         # Example: (12345, "model.safetensors")
     ],
+    "huggingface_token": "",
     "huggingface_models": [
         # Format: "repo_id"
-        "runwayml/stable-diffusion-v1-5",  # Default model
-        "black-forest-labs/FLUX.1-Kontext-dev"
+        "runwayml/stable-diffusion-v1-5"  # Default model
     ]
 }
 
@@ -49,6 +49,9 @@ def load_config() -> Dict:
     # Override with environment variables
     if "CIVITAI_TOKEN" in os.environ:
         config["civitai_token"] = os.environ["CIVITAI_TOKEN"]
+    
+    if "HUGGINGFACE_TOKEN" in os.environ:
+        config["huggingface_token"] = os.environ["HUGGINGFACE_TOKEN"]
                 
     return config
 
@@ -81,14 +84,19 @@ def download_civitai_models(models: List[Tuple[int, str]], token: str, target_di
             logger.error(f"Failed to download {filename}: {e}")
 
 
-def download_huggingface_models(repos: List[str], target_dir: str) -> None:
+def download_huggingface_models(repos: List[str], target_dir: str, token: str = "") -> bool:
     """Download models from Hugging Face.
     
     Args:
-        repos: List of Hugging Face repository IDs
+        repos: List of repository IDs
         target_dir: Directory to save models
+        token: Hugging Face API token for accessing gated models
+        
+    Returns:
+        bool: True if all downloads succeeded, False otherwise
     """
     target_path = Path(target_dir)
+    success = True
     
     for repo in repos:
         model_name = repo.split("/")[-1]
@@ -108,7 +116,8 @@ def download_huggingface_models(repos: List[str], target_dir: str) -> None:
                 cache_dir=str(path),
                 local_dir=str(path),
                 local_dir_use_symlinks=False if 'local_dir_use_symlinks' in snapshot_download.__code__.co_varnames else None,
-                resume_download=True
+                resume_download=True,
+                token=token if token else None
             )
             logger.info(f"Successfully downloaded {repo}")
         except Exception as e:
@@ -136,8 +145,9 @@ def main(config):
     
     # Download models from HuggingFace
     huggingface_models = config["huggingface_models"]
+    huggingface_token = config["huggingface_token"]
     if huggingface_models:
-        download_huggingface_models(huggingface_models, config["target_dir"])
+        download_huggingface_models(huggingface_models, config["target_dir"], huggingface_token)
     
     logger.info("Download process completed")
 
