@@ -107,7 +107,7 @@ def download_huggingface_models(repos: List[str], target_dir: str) -> None:
                 repo_id=repo,
                 cache_dir=str(path),
                 local_dir=str(path),
-                local_dir_use_symlinks=False,
+                local_dir_use_symlinks=False if 'local_dir_use_symlinks' in snapshot_download.__code__.co_varnames else None,
                 resume_download=True
             )
             logger.info(f"Successfully downloaded {repo}")
