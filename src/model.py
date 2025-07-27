@@ -9,7 +9,7 @@ logger = RunPodLogger()
 
 class StableDiffusionModel:
     # Default model ID
-    DEFAULT_MODEL_ID = "black-forest-labs/FLUX.1-Kontext-dev"
+    DEFAULT_MODEL_ID = "runwayml/stable-diffusion-v1-5"
     
     def __init__(self, model_id: str = None):
         """Initialize the Stable Diffusion model.

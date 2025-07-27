@@ -30,8 +30,7 @@ CONFIG = {
     ],
     "huggingface_models": [
         # Format: "repo_id"
-        "runwayml/stable-diffusion-v1-5",  # Default model
-        "black-forest-labs/FLUX.1-Kontext-dev"
+        "runwayml/stable-diffusion-v1-5"  # Default model
     ]
 }
 
