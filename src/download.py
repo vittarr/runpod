@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# file download.py
 """
 Download script for RunPod AI worker.
 
@@ -30,7 +31,8 @@ CONFIG = {
     ],
     "huggingface_models": [
         # Format: "repo_id"
-        "runwayml/stable-diffusion-v1-5"  # Default model
+        "runwayml/stable-diffusion-v1-5",  # Default model
+        "black-forest-labs/FLUX.1-Kontext-dev"
     ]
 }
 
@@ -98,14 +100,20 @@ def download_huggingface_models(repos: List[str], target_dir: str) -> None:
             
         try:
             logger.info(f"Downloading {repo} from Hugging Face...")
-            subprocess.run([
-                "huggingface-cli", "download", repo,
-                "--cache-dir", str(path),
-                "--local-dir-use-symlinks", "False"
-            ], check=True)
+            from huggingface_hub import snapshot_download
+            
+            # Use the Python API instead of CLI
+            snapshot_download(
+                repo_id=repo,
+                cache_dir=str(path),
+                local_dir=str(path),
+                local_dir_use_symlinks=False,
+                resume_download=True
+            )
             logger.info(f"Successfully downloaded {repo}")
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             logger.error(f"Failed to download {repo}: {e}")
+            return False
 
 
 def main(config):

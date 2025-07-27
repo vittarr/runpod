@@ -1,5 +1,6 @@
+# file model.py
 import torch
-from diffusers import StableDiffusionImg2ImgPipeline
+from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 from PIL import Image
 from runpod.serverless.modules.rp_logger import RunPodLogger
@@ -25,7 +26,7 @@ class StableDiffusionModel:
     def load_model(self):
         """Load the model into memory."""
         logger.info(f"Loading model {self.model_id} on {self.device}...")
-        self.pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+        self.pipe = DiffusionPipeline.from_pretrained(
             self.model_id,
             torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
         ).to(self.device)

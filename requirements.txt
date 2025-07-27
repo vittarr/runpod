@@ -1,18 +1,20 @@
 # Core dependencies
 diffusers[torch]==0.26.3
-torch
+torch==2.0.1
 
 # Required by diffusers
-transformers
-accelerate
-safetensors
+transformers==4.30.2
+accelerate==0.21.0
+safetensors==0.3.1
 
 # RunPod integration
-runpod
+runpod==1.3.0
 
 # Image processing
-pillow
+pillow==10.0.0
 
 # Network and model downloads
-requests
-huggingface-hub
+requests==2.31.0
+huggingface-hub==0.16.4  # This version is compatible with diffusers 0.26.3
+tqdm==4.66.1
+python-dotenv==1.0.0

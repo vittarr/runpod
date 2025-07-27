@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# file handler.py
 """
 RunPod Serverless Handler for AI image processing.
 
@@ -14,7 +15,7 @@ from runpod.serverless.modules.rp_logger import RunPodLogger
 # Import our modules
 from schema import IMAGE_GENERATION_SCHEMA
 from model import StableDiffusionModel
-from utils import decode_base64_image, encode_base64_image, fetch_image_from_url
+from utils import encode_base64_image
 
 # Configure logging
 logger = RunPodLogger()
@@ -65,14 +66,9 @@ def handler(job):
         # Initialize model (using model_id if provided, otherwise using default)
         sd_model = init_model(input_data.get("model_id"))
         
-        # Process image input
-        image = process_image_input(input_data["image"])
-        if isinstance(image, dict) and "error" in image:
-            return image  # Return error if image processing failed
-        
-        # Generate image
+        # Generate image - pass image input directly to the model
         result = sd_model.run_img2img(
-            image=image,
+            image=input_data["image"],
             prompt=input_data["prompt"],
             negative_prompt=input_data["negative_prompt"],
             guidance_scale=input_data["guidance_scale"],
@@ -91,27 +87,7 @@ def handler(job):
         return {"error": str(e)}
 
 
-def process_image_input(image_input):
-    """Process image input that can be either a URL or base64 encoded image.
-    
-    Args:
-        image_input: URL or base64 encoded image
-        
-    Returns:
-        PIL.Image or dict with error message
-    """
-    if image_input.startswith("http"):
-        # It's a URL, fetch the image
-        image = fetch_image_from_url(image_input)
-        if image is None:
-            return {"error": "Failed to fetch image from URL"}
-        return image
-    else:
-        # Assume it's a base64 encoded image
-        try:
-            return decode_base64_image(image_input)
-        except Exception as e:
-            return {"error": f"Failed to decode base64 image: {str(e)}"}
+# Function process_image_input removed as the model now handles image input directly
 
 
 # Start the serverless worker
