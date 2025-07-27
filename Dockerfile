@@ -1,16 +1,32 @@
-FROM python:3.10-slim
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
-# Basic setup
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
-# Install dependencies
-RUN pip install --upgrade pip
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-# Add code
-COPY . /app
 WORKDIR /app
 
-# RunPod serverless handler
-CMD ["python", "handler.py"]
+# Set up environment for real-time logging
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create volume directory for models
+RUN mkdir -p /runpod-volume/my_volume
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY src/ src/
+
+# Download default model during build
+RUN python -u src/download.py
+
+# Set the entrypoint
+CMD ["python", "-u", "src/handler.py"]
+

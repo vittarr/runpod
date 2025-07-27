@@ -1,7 +1,18 @@
+# Core dependencies
 diffusers[torch]==0.26.3
+torch
+
+# Required by diffusers
 transformers
 accelerate
-torch
 safetensors
+
+# RunPod integration
 runpod
+
+# Image processing
 pillow
+
+# Network and model downloads
+requests
+huggingface-hub
