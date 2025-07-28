@@ -21,7 +21,7 @@ class StableDiffusionModel:
         
     def load_model(self):
         """Load the model into memory."""
-        logger.info(f"Loading model {self.model_path} on {self.device}...")
+        logger.info(f"=== [MODEL] === Loading model {self.model_path} on {self.device}...")
         self.pipe = DiffusionPipeline.from_pretrained(
             self.model_path,
             torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
@@ -29,7 +29,7 @@ class StableDiffusionModel:
         
         # Optimize for memory
         self.pipe.enable_attention_slicing()
-        logger.info("Model loaded successfully")
+        logger.info("=== [MODEL] === Model loaded successfully")
         return self
         
     def run_img2img(self, image, prompt, negative_prompt=None, guidance_scale=None, strength=None):

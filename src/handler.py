@@ -66,7 +66,7 @@ def handler(job):
     Returns:
         dict: Job output with generated image or error
     """
-    logger.info("=== [HANDLER] === Processing job: ", job)
+    logger.info("[HANDLER] processing job: ", job)
     start_time = time.time()
     
     MODEL_ID="runwayml/stable-diffusion-v1-5"
@@ -99,7 +99,7 @@ def handler(job):
         }
         
     except Exception as e:
-        logger.error(f"=== [HANDLER] === Error processing request: {str(e)}")
+        logger.error(f"[HANDLER] Error processing request: {str(e)}")
         return {"error": str(e)}
 
 
@@ -108,6 +108,6 @@ def handler(job):
 
 # Start the serverless worker
 if __name__ == "__main__":
-    logger.info("=== [HANDLER] === Starting RunPod Serverless Worker")
+    logger.info("[HANDLER] Starting RunPod Serverless Worker")
     runpod.serverless.start({"handler": handler})
 
