@@ -7,40 +7,53 @@ This module provides the handler function for processing image generation reques
 using Stable Diffusion models on RunPod's serverless infrastructure.
 """
 
+import os
 import time
+from pathlib import Path
+
 import runpod
+from runpod import RunpodLogger
 from runpod.serverless.utils.rp_validator import validate
-from runpod.serverless.modules.rp_logger import RunPodLogger
 
-# Import our modules
-from schema import IMAGE_GENERATION_SCHEMA
 from model import StableDiffusionModel
-from utils import encode_base64_image
 
-# Configure logging
-logger = RunPodLogger()
+logger = RunpodLogger()
 
-# Initialize the model (will be loaded on first request)
+# Model configuration
+MODEL_DIR = Path(os.getenv("MODEL_STORAGE_PATH", "/runpod-volume/my_volume"))
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
 model = None
 
+def get_model_path(model_id: str) -> str:
+    """Get the local path for a model, downloading if necessary."""
+    # Simple path construction
+    if '/' in model_id:  # HuggingFace format
+        model_name = model_id.split('/')[-1]
+        return str(MODEL_DIR / model_name)
+    else:  # Local path or Civitai filename
+        return str(MODEL_DIR / model_id)
 
-def init_model(model_id=None):
-    """Initialize the model if not already loaded or if a different model is requested.
-    
-    Args:
-        model_id (str, optional): ID of the model to load. If None, uses the default model.
-        
-    Returns:
-        Initialized StableDiffusionModel instance
-    """
+
+from download import download_huggingface_model, download_civitai_model
+
+def init_model(model_id: str = None):
+    """Initialize the model, downloading if needed."""
     global model
     
-    # Initialize or switch model if needed
-    if model is None or (model_id and model.model_id != model_id):
-        model_name = model_id if model_id else StableDiffusionModel.DEFAULT_MODEL_ID
-        logger.info(f"{'Initializing' if model is None else 'Switching to'} model: {model_name}")
-        model = StableDiffusionModel(model_id=model_id)
-        
+    if model is None:
+        model_path = get_model_path(model_id)
+        if not os.path.exists(model_path):
+            if '/' in model_id:  # HuggingFace
+                download_huggingface_model(
+                    repo_id=model_id,
+                    target_dir=str(MODEL_DIR),
+                    token=os.getenv("HUGGINGFACE_TOKEN")
+                )
+            else:
+                logger.warning("Civitai download requires model_id and filename mapping. Skipping download.")
+        logger.info(f"Initializing model: {model_id} at {model_path}")
+        model = StableDiffusionModel(model_path)
     return model
 
 
@@ -55,6 +68,8 @@ def handler(job):
     """
     start_time = time.time()
     
+    MODEL_ID="runwayml/stable-diffusion-v1-5"
+
     try:
         # Validate input
         validation_result = validate(job["input"], IMAGE_GENERATION_SCHEMA)
@@ -62,9 +77,9 @@ def handler(job):
             return {"error": validation_result["errors"]}
         
         input_data = validation_result["validated_input"]
-        
-        # Initialize model (using model_id if provided, otherwise using default)
-        sd_model = init_model(input_data.get("model_id"))
+                
+        # Initialize model (using model_id if provided)
+        sd_model = init_model(MODEL_ID)
         
         # Generate image - pass image input directly to the model
         result = sd_model.run_img2img(

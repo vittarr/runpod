@@ -21,9 +21,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy source code
 COPY src/ src/
 
-# Download default model during build
-RUN python -u src/download.py
-
 # Set the entrypoint
 CMD ["python", "-u", "src/handler.py"]
 

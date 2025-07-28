@@ -3,31 +3,27 @@ import torch
 from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 from PIL import Image
-from runpod.serverless.modules.rp_logger import RunPodLogger
-
+from runpod import RunpodLogger
 # Configure logging
-logger = RunPodLogger()
+logger = RunpodLogger()
 
 class StableDiffusionModel:
-    # Default model ID
-    DEFAULT_MODEL_ID = "runwayml/stable-diffusion-v1-5"
     
-    def __init__(self, model_id: str = None):
+    def __init__(self, model_path: str):
         """Initialize the Stable Diffusion model.
         
         Args:
-            model_id (str, optional): The model ID to load from HuggingFace or local path.
-                                      If not provided, uses the default model.
+            model_path (str): The model path to load from local path.
         """
-        self.model_id = model_id if model_id else self.DEFAULT_MODEL_ID
+        self.model_path = model_path
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.pipe = None
         
     def load_model(self):
         """Load the model into memory."""
-        logger.info(f"Loading model {self.model_id} on {self.device}...")
+        logger.info(f"Loading model {self.model_path} on {self.device}...")
         self.pipe = DiffusionPipeline.from_pretrained(
-            self.model_id,
+            self.model_path,
             torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
         ).to(self.device)
         
@@ -36,8 +32,7 @@ class StableDiffusionModel:
         logger.info("Model loaded successfully")
         return self
         
-    def run_img2img(self, image, prompt, negative_prompt=None, 
-                   guidance_scale=None, strength=None):
+    def run_img2img(self, image, prompt, negative_prompt=None, guidance_scale=None, strength=None):
         """Run image-to-image generation.
         
         Args:
