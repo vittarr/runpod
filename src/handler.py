@@ -15,6 +15,7 @@ import runpod
 import logging
 from runpod.serverless.utils.rp_validator import validate
 
+from schema import IMAGE_GENERATION_SCHEMA
 from model import StableDiffusionModel
 
 logger = logging.getLogger("handler")
