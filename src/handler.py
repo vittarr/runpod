@@ -12,12 +12,13 @@ import time
 from pathlib import Path
 
 import runpod
-from runpod import RunpodLogger
+import logging
 from runpod.serverless.utils.rp_validator import validate
 
 from model import StableDiffusionModel
 
-logger = RunpodLogger()
+logger = logging.getLogger("handler")
+logging.basicConfig(level=logging.INFO)
 
 # Model configuration
 MODEL_DIR = Path(os.getenv("MODEL_STORAGE_PATH", "/runpod-volume/my_volume"))

@@ -8,9 +8,10 @@ This module provides functions for downloading models from Hugging Face and Civi
 import subprocess
 from pathlib import Path
 
-from runpod import RunpodLogger
+import logging
 
-logger = RunpodLogger()
+logger = logging.getLogger("download")
+logging.basicConfig(level=logging.INFO)
 
 def download_huggingface_model(repo_id: str, target_dir: str, token: str = None) -> str:
     """Download a model from Hugging Face if not already present."""

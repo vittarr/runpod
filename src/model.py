@@ -3,9 +3,10 @@ import torch
 from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 from PIL import Image
-from runpod import RunpodLogger
+import logging
 # Configure logging
-logger = RunpodLogger()
+logger = logging.getLogger("model")
+logging.basicConfig(level=logging.INFO)
 
 class StableDiffusionModel:
     
