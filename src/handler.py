@@ -96,7 +96,7 @@ def handler(job):
         # Return result
         return {
             "image": encode_base64_image(result.images[0]),
-            "prompt": input_data["prompt"],
+            # "prompt": input_data["prompt"],
             "processing_time": time.time() - start_time
         }
         
