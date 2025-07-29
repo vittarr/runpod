@@ -18,18 +18,19 @@ logging.basicConfig(level=logging.INFO)
 def download_huggingface_model(repo_id: str, target_dir: str, token: str) -> str:
     """Download a model from Hugging Face if not already present."""
     logger.info(f"[DOWNLOAD HF] Starting download for {repo_id}...")
-    model_path = Path(target_dir) / repo_id.split('/')[-1]
-    if not model_path.exists():
-        logger.info(f"[DOWNLOAD HF] dell files in {target_dir} ...")
+    target_path = Path(target_dir)
+    if not target_path.exists() or not any(target_path.iterdir()):
+        logger.info(f"[DOWNLOAD HF] Deleting files in {target_dir} ...")
         subprocess.run(['rm', '-rf', str(target_dir)], check=True)
-        logger.info(f"[DOWNLOAD HF] Downloading {repo_id} to {model_path} ...")
+        target_path.mkdir(parents=True, exist_ok=True)
+        logger.info(f"[DOWNLOAD HF] Downloading {repo_id} to {target_dir} ...")
         snapshot_download(
             repo_id=repo_id,
-            local_dir=str(model_path),
+            local_dir=str(target_path),
             resume_download=True,
             token=token
         )
-    return str(model_path)
+    return str(target_path)
 
 
 def download_civitai_model(model_id: int, filename: str, target_dir: str, token: str) -> str:
