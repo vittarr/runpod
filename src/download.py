@@ -15,7 +15,7 @@ logger = logging.getLogger("download")
 logging.basicConfig(level=logging.INFO)
 
 
-def download_huggingface_model(repo_id: str, target_dir: str, token: str) -> str:
+def download_huggingface_model(repo_id: str, target_dir: str, token: str | None = None) -> str:
     """Download a model from Hugging Face if not already present."""
     logger.info(f"[DOWNLOAD HF] Starting download for {repo_id}...")
     target_path = Path(target_dir)
@@ -30,10 +30,13 @@ def download_huggingface_model(repo_id: str, target_dir: str, token: str) -> str
             resume_download=True,
             token=token
         )
+        # Log directory contents after download
+        files = list(target_path.glob('**/*'))
+        logger.info(f"[DOWNLOAD HF] Files in {target_path} after download: {[str(f) for f in files]}")
     return str(target_path)
 
 
-def download_civitai_model(model_id: int, filename: str, target_dir: str, token: str) -> str:
+def download_civitai_model(model_id: int, filename: str, target_dir: str, token: str | None = None) -> str:
     """Download a model from Civitai if not already present."""
     logger.info(f"[DOWNLOAD Civitai] Starting download for {model_id}...")
     model_path = Path(target_dir) / filename
