@@ -15,11 +15,13 @@ logger = logging.getLogger("download")
 logging.basicConfig(level=logging.INFO)
 
 
-def download_huggingface_model(repo_id: str, target_dir: str, token: str = None) -> str:
+def download_huggingface_model(repo_id: str, target_dir: str, token: str) -> str:
     """Download a model from Hugging Face if not already present."""
     logger.info(f"[DOWNLOAD HF] Starting download for {repo_id}...")
     model_path = Path(target_dir) / repo_id.split('/')[-1]
     if not model_path.exists():
+        logger.info(f"[DOWNLOAD HF] dell files in {target_dir} ...")
+        subprocess.run(['rm', '-rf', str(target_dir)], check=True)
         logger.info(f"[DOWNLOAD HF] Downloading {repo_id} to {model_path} ...")
         snapshot_download(
             repo_id=repo_id,
@@ -30,7 +32,7 @@ def download_huggingface_model(repo_id: str, target_dir: str, token: str = None)
     return str(model_path)
 
 
-def download_civitai_model(model_id: int, filename: str, target_dir: str, token: str = None) -> str:
+def download_civitai_model(model_id: int, filename: str, target_dir: str, token: str) -> str:
     """Download a model from Civitai if not already present."""
     logger.info(f"[DOWNLOAD Civitai] Starting download for {model_id}...")
     model_path = Path(target_dir) / filename
