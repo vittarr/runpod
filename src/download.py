@@ -40,18 +40,30 @@ def download_huggingface_model(repo_id: str, target_dir: str, token: str | None 
         subprocess.run(['rm', '-rf', str(target_dir)], check=True)
         target_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"[DOWNLOAD HF] Downloading {repo_id} to {target_dir} ...")
-        snapshot_download(
+        actual_model_path = snapshot_download(
             repo_id=repo_id,
             local_dir=str(target_path),
             resume_download=True,
             token=token
         )
+        logger.info(f"[DOWNLOAD HF] snapshot_download returned path: {actual_model_path}")
         # Log directory contents after download
-        files = list(target_path.glob('**/*'))
-        logger.info(f"[DOWNLOAD HF] Files in {target_path} after download: {[str(f) for f in files]}")
+        files = list(Path(actual_model_path).glob('**/*'))
+        logger.info(f"[DOWNLOAD HF] Files in {actual_model_path} after download: {[str(f) for f in files]}")
         log_disk_usage(target_dir, 'Target Directory (after download)')
         log_disk_usage(HF_HUB_CACHE, 'HF_HUB_CACHE (after download)')
-    return str(target_path)
+        # Warn if directory is empty or missing expected files
+        if not files:
+            logger.warning(f"[DOWNLOAD HF] Directory {actual_model_path} is empty after download!")
+        else:
+            expected_files = ['config.json', 'model_index.json']
+            present_files = [f.name for f in files]
+            for ef in expected_files:
+                if ef not in present_files:
+                    logger.warning(f"[DOWNLOAD HF] Expected file {ef} not found in {actual_model_path}!")
+    else:
+        actual_model_path = str(target_path)
+    return actual_model_path
 
 
 
