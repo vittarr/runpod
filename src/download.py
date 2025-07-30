@@ -15,6 +15,8 @@ import logging
 # Set HF_HUB_CACHE to use the network volume
 HF_HUB_CACHE = "/runpod-volume/my_volume/hf_cache"
 os.environ["HF_HUB_CACHE"] = HF_HUB_CACHE
+# Ensure the cache directory exists
+Path(HF_HUB_CACHE).mkdir(parents=True, exist_ok=True)
 
 logger = logging.getLogger("download")
 logging.basicConfig(level=logging.INFO)
