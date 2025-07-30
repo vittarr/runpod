@@ -5,20 +5,34 @@ Model download utility for RunPod AI worker.
 This module provides functions for downloading models from Hugging Face and Civitai.
 """
 
+import os
+import shutil
 import subprocess
 from huggingface_hub import snapshot_download
 from pathlib import Path
-
 import logging
+
+# Set HF_HUB_CACHE to use the network volume
+HF_HUB_CACHE = "/runpod-volume/my_volume/hf_cache"
+os.environ["HF_HUB_CACHE"] = HF_HUB_CACHE
 
 logger = logging.getLogger("download")
 logging.basicConfig(level=logging.INFO)
+
+def log_disk_usage(path, label):
+    total, used, free = shutil.disk_usage(path)
+    logger.info(f"[DISK USAGE] {label} - Total: {total // (1024**3)}GB, Used: {used // (1024**3)}GB, Free: {free // (1024**3)}GB")
 
 
 def download_huggingface_model(repo_id: str, target_dir: str, token: str | None = None) -> str:
     """Download a model from Hugging Face if not already present."""
     logger.info(f"[DOWNLOAD HF] Starting download for {repo_id}...")
     target_path = Path(target_dir)
+
+    # Log disk usage before download
+    log_disk_usage(target_dir if target_path.exists() else '/', 'Target Directory')
+    log_disk_usage(HF_HUB_CACHE, 'HF_HUB_CACHE')
+
     if not target_path.exists() or not any(target_path.iterdir()):
         logger.info(f"[DOWNLOAD HF] Deleting files in {target_dir} ...")
         subprocess.run(['rm', '-rf', str(target_dir)], check=True)
@@ -33,7 +47,10 @@ def download_huggingface_model(repo_id: str, target_dir: str, token: str | None 
         # Log directory contents after download
         files = list(target_path.glob('**/*'))
         logger.info(f"[DOWNLOAD HF] Files in {target_path} after download: {[str(f) for f in files]}")
+        log_disk_usage(target_dir, 'Target Directory (after download)')
+        log_disk_usage(HF_HUB_CACHE, 'HF_HUB_CACHE (after download)')
     return str(target_path)
+
 
 
 def download_civitai_model(model_id: int, filename: str, target_dir: str, token: str | None = None) -> str:
